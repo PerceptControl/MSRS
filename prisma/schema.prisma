@@ -1,0 +1,180 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      =  "postgresql://root:08d9c175618a7347e79700bc4086eb99ffab27f97f6de8abd592182916871fb7f3d348dd1600c3121081cb07aec289352cd9619f263e0c063fac86c961b9769e@localhost:61092/data?schema=public"
+  //env("DB_CONNECTION_STRING")
+}
+
+model Persons {
+  ///имя пользователя
+  name String @id
+
+  ///текущий социальный рейтинг пользователя, который является суммой рейтингов ссылающихся досье
+  rating Int @default(1500) @db.SmallInt
+
+  //Внешние ссылки
+
+  //Досье
+  passport Dossiers?  @relation("passport")
+  dossiers Dossiers[] @relation("dossiers")
+}
+
+model Dossiers {
+  Passport Persons @relation("passport", fields: [passport], references: [name])
+  ///ссылка на изначального пользователя для которого создавалось досье
+  passport String  @id
+
+  Person Persons @relation("dossiers", fields: [person], references: [name])
+  ///ссылка на реального пользователя на которое ссылается досье
+  person String
+
+  ///текущий социальный рейтинг отдельного досье
+  rating Int @default(1500) @db.SmallInt
+
+  //Reports
+  where_accuser Reports[] @relation("Accuser")
+  where_accused Reports[] @relation("Accused")
+
+  //Recommends
+  where_recommender Recommendations[] @relation("Recommender")
+  where_recommended Recommendations[] @relation("Recommended")
+
+  foreign_events Events[]
+
+  Statistic Dossier_Statistic?
+  Verdicts  Verdicts[]
+}
+
+model Dossier_Statistic {
+  User Dossiers @relation(fields: [user], references: [passport])
+  user String   @id
+
+  reports    Int @default(0)
+  recommends Int @default(0)
+
+  reported    Int @default(0)
+  recommended Int @default(0)
+
+  total_events   Int @default(0)
+  total_verdicts Int @default(0)
+}
+
+model Reports {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  Accuser Dossiers @relation("Accuser", fields: [accuser], references: [passport])
+  accuser String
+
+  Accused Dossiers @relation("Accused", fields: [accused], references: [passport])
+  accused String 
+
+  reasons    REPORT_REASONS[]
+  match      String
+  created_at DateTime         @default(now())
+
+  explanation String?
+
+  Verdict Verdicts[]
+
+  @@index([accuser])
+  @@index([accused])
+  @@index([reasons])
+  @@index([match])
+  @@index([created_at])
+}
+
+model Recommendations {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  Recommeneder Dossiers @relation("Recommender", fields: [recommender], references: [passport])
+  recommender  String
+
+  Recommended Dossiers @relation("Recommended", fields: [recommended], references: [passport])
+  recommended String
+
+  reasons    COMMEND_REASONS[]
+  match      String
+  created_at DateTime          @default(now())
+
+  explanation String?
+
+  @@index([recommender])
+  @@index([recommended])
+  @@index([reasons])
+  @@index([match])
+  @@index([created_at])
+}
+
+model Events {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  User Dossiers @relation(fields: [user], references: [passport])
+  user String
+
+  Code Event_Codes @relation(fields: [code], references: [code])
+  code Int         @db.SmallInt
+
+  created_at DateTime @default(now())
+
+  rating_change Int @db.SmallInt
+
+  match       String?
+  explanation String?
+
+  @@index([user])
+  @@index([code])
+  @@index([created_at])
+}
+
+model Verdicts {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  User Dossiers @relation(fields: [user], references: [passport])
+  user String
+
+  execution  PUNISHMENTS
+  duration   DateTime
+  created_at DateTime    @default(now())
+
+  explanation String
+
+  Report Reports? @relation(fields: [report], references: [id])
+  report String?  @db.Uuid
+
+  @@index([user])
+  @@index([execution])
+  @@index([duration])
+  @@index([created_at])
+}
+
+model Event_Codes {
+  ///зарезервированный код события
+  code          Int    @id @default(autoincrement()) @db.SmallInt
+  ///имя события
+  name          String
+  ///стандартное значение изменение рейтинга
+  rating_change Int    @db.SmallInt
+
+  Events Events[]
+}
+
+enum REPORT_REASONS {
+  FLOOD
+  CHEAT
+}
+
+enum COMMEND_REASONS {
+  TEAMPLAY
+  SKILL
+}
+
+enum PUNISHMENTS {
+  BAN
+  MUTE
+}
