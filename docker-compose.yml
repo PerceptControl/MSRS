@@ -7,6 +7,8 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_DB=data
       - POSTGRES_PASSWORD=08d9c175618a7347e79700bc4086eb99ffab27f97f6de8abd592182916871fb7f3d348dd1600c3121081cb07aec289352cd9619f263e0c063fac86c961b9769e
+    ports:
+      - '61092:5432'
   api:
     build: .
     image: 'perceptioncontrol/matchup_social_rating_service'
@@ -14,6 +16,7 @@ services:
       - '3651:80'
     environment:
       PORT_HTTP: '80'
+      DB_CONNECTION_STRING: 'postgresql://root:08d9c175618a7347e79700bc4086eb99ffab27f97f6de8abd592182916871fb7f3d348dd1600c3121081cb07aec289352cd9619f263e0c063fac86c961b9769e@0.0.0.0:61092/data?schema=public'
       DB_HOST: 'db'
       DB_USER: 'root'
       DB_BASE: data

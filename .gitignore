@@ -1,6 +1,6 @@
-# Docker-Compose
-docker-compose.yml
-
+prisma/*
+.prisma*
+.gitignore
 
 # Logs
 logs

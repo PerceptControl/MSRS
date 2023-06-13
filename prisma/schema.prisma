@@ -46,27 +46,11 @@ model Dossiers {
   where_recommended Recommendations[] @relation("Recommended")
 
   foreign_events Events[]
-
-  Statistic Dossier_Statistic?
   Verdicts  Verdicts[]
 }
 
-model Dossier_Statistic {
-  User Dossiers @relation(fields: [user], references: [passport])
-  user String   @id
-
-  reports    Int @default(0)
-  recommends Int @default(0)
-
-  reported    Int @default(0)
-  recommended Int @default(0)
-
-  total_events   Int @default(0)
-  total_verdicts Int @default(0)
-}
-
 model Reports {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @db.Char(26)
 
   Accuser Dossiers @relation("Accuser", fields: [accuser], references: [passport])
   accuser String
@@ -90,7 +74,7 @@ model Reports {
 }
 
 model Recommendations {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @db.Char(26)
 
   Recommeneder Dossiers @relation("Recommender", fields: [recommender], references: [passport])
   recommender  String
@@ -112,7 +96,7 @@ model Recommendations {
 }
 
 model Events {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @db.Char(26)
 
   User Dossiers @relation(fields: [user], references: [passport])
   user String
@@ -133,7 +117,7 @@ model Events {
 }
 
 model Verdicts {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @db.Char(26)
 
   User Dossiers @relation(fields: [user], references: [passport])
   user String
@@ -145,7 +129,7 @@ model Verdicts {
   explanation String
 
   Report Reports? @relation(fields: [report], references: [id])
-  report String?  @db.Uuid
+  report String?  @db.Char(26)
 
   @@index([user])
   @@index([execution])
