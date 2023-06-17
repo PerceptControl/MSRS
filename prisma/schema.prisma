@@ -18,6 +18,9 @@ model Persons {
   ///текущий социальный рейтинг пользователя, который является суммой рейтингов ссылающихся досье
   rating Int @default(1500) @db.SmallInt
 
+  //флаг, показывающий является ли пользователь смурфом
+  fake Boolean @default(false)
+
   //Внешние ссылки
 
   //Досье
@@ -38,27 +41,27 @@ model Dossiers {
   rating Int @default(1500) @db.SmallInt
 
   //Reports
-  where_accuser Reports[] @relation("Accuser")
-  where_accused Reports[] @relation("Accused")
+  where_accuser Reports[] @relation("accuser")
+  where_accused Reports[] @relation("accused")
 
   //Recommends
-  where_recommender Recommendations[] @relation("Recommender")
-  where_recommended Recommendations[] @relation("Recommended")
+  where_recommender Recommendations[] @relation("recommender")
+  where_recommended Recommendations[] @relation("recommended")
 
   foreign_events Events[]
-  Verdicts  Verdicts[]
+  verdicts  Verdicts[]
 }
 
 model Reports {
   id String @id @db.Char(26)
 
-  Accuser Dossiers @relation("Accuser", fields: [accuser], references: [passport])
+  Accuser Dossiers @relation("accuser", fields: [accuser], references: [passport])
   accuser String
 
-  Accused Dossiers @relation("Accused", fields: [accused], references: [passport])
+  Accused Dossiers @relation("accused", fields: [accused], references: [passport])
   accused String 
 
-  reasons    REPORT_REASONS[]
+  reasons    Int[] @db.SmallInt
   match      String
   created_at DateTime         @default(now())
 
@@ -76,13 +79,13 @@ model Reports {
 model Recommendations {
   id String @id @db.Char(26)
 
-  Recommeneder Dossiers @relation("Recommender", fields: [recommender], references: [passport])
+  Recommender Dossiers @relation("recommender", fields: [recommender], references: [passport])
   recommender  String
 
-  Recommended Dossiers @relation("Recommended", fields: [recommended], references: [passport])
+  Recommended Dossiers @relation("recommended", fields: [recommended], references: [passport])
   recommended String
 
-  reasons    COMMEND_REASONS[]
+  reasons    Int[] @db.SmallInt
   match      String
   created_at DateTime          @default(now())
 
@@ -122,7 +125,7 @@ model Verdicts {
   User Dossiers @relation(fields: [user], references: [passport])
   user String
 
-  execution  PUNISHMENTS
+  execution  Int[] @db.SmallInt
   duration   DateTime
   created_at DateTime    @default(now())
 
@@ -146,19 +149,4 @@ model Event_Codes {
   rating_change Int    @db.SmallInt
 
   Events Events[]
-}
-
-enum REPORT_REASONS {
-  FLOOD
-  CHEAT
-}
-
-enum COMMEND_REASONS {
-  TEAMPLAY
-  SKILL
-}
-
-enum PUNISHMENTS {
-  BAN
-  MUTE
 }
