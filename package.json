@@ -2,7 +2,8 @@
   "scripts": {
     "service_up": "docker compose build && docker compose up",
     "push_image": "docker build . -t perceptioncontrol/matchup_srs && docker push perceptioncontrol/matchup_srs",
-    "app": "node lib/app.js"
+    "app": "node lib/app.js",
+    "test": "node --test --watch lib"
   },
   "main": "app.js",
   "dependencies": {
