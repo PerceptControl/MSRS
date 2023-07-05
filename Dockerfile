@@ -1,4 +1,4 @@
-FROM node:18-buster
+FROM node:20-buster
 WORKDIR /code
 
 COPY . .
